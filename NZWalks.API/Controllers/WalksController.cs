@@ -49,7 +49,7 @@ namespace NZWalks.API.Controllers
         //GET: /api/Walks/{id}
         [HttpGet]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var walk = await walkRepository.GetByIdAsync(id);
 
