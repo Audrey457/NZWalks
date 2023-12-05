@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NZWalks.API;
 using NZWalks.API.Data;
 using NZWalks.API.Mappings;
 using NZWalks.API.Repositories;
@@ -27,8 +29,15 @@ builder.Services.AddControllers();
 builder.Services.AddApiVersioning(opt =>
 {
     opt.AssumeDefaultVersionWhenUnspecified = true;
+    opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+    opt.ReportApiVersions = true;
 });
 
+builder.Services.AddVersionedApiExplorer(opt =>
+{
+    opt.GroupNameFormat = "'v'VVV";
+    opt.SubstituteApiVersionInUrl = true;
+});
 
 builder.Services.AddHttpContextAccessor();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -103,13 +112,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     });
 
+builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+
 var app = builder.Build();
+
+var versionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(opt =>
+    {
+        foreach(var description in versionDescriptionProvider.ApiVersionDescriptions)
+        {
+            opt.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", 
+                description.GroupName.ToUpperInvariant());
+        }
+    });
 }
 
 //app.UseMiddleware<ExceptionHandlerMiddleware>();
