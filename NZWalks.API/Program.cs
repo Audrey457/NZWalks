@@ -132,8 +132,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-//app.UseMiddleware<ExceptionHandlerMiddleware>();
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -145,6 +143,8 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
 });
+
+app.UseMiddleware<NZWalks.API.Middlewares.ExceptionHandlerMiddleware>();
 
 app.MapControllers();
 
