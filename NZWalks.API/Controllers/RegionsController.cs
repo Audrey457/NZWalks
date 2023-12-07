@@ -35,7 +35,7 @@ namespace NZWalks.API.Controllers
         //GET : https://localhost:portnumber/api/regions
         [HttpGet]
         [MapToApiVersion("1.0")]
-        //[Authorize(Roles = "Reader, Writer")]
+        [Authorize(Roles = "Reader, Writer")]
         public async Task<IActionResult> GetAll()
         {
             //Get data from db - domain models
